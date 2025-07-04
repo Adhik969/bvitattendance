@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management - Diploma Student Attendance Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+        }
+
+        .navbar {
+            background: #2c3e50;
+            padding: 1rem;
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .navbar h1 {
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .import-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .import-zone {
+            border: 2px dashed #3498db;
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 1rem 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .import-zone.dragover {
+            background: #e8f4fd;
+            border-color: #2980b9;
+        }
+
+        .import-zone i {
+            font-size: 3rem;
+            color: #3498db;
+            margin-bottom: 1rem;
+        }
+
+        .import-zone p {
+            margin: 0.5rem 0;
+            color: #2c3e50;
+        }
+
+        .import-zone .upload-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .import-zone .upload-hint {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .import-buttons {
+            margin-top: 1rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .download-template {
+            background: #27ae60;
+        }
+
+        .download-template:hover {
+            background: #219a52;
+        }
+
+        #importProgress {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #f0f2f5;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #3498db;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .import-result {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .import-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .import-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .add-student-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            flex: 1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .lecture-type-select {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .lecture-type-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+        }
+
+        .student-list {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        table th, table td {
+            text-align: center;
+            vertical-align: middle;
+            font-size: 15px;
+            padding: 1rem 0.5rem;
+        }
+        table tbody tr:nth-child(even) {
+            background: #f7fafd;
+        }
+        table th {
+            position: sticky;
+            top: 0;
+            background: #f1f3f4;
+            z-index: 2;
+        }
+
+        th, td {
+            padding: 1rem 0.5rem;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #f8f9fa;
+            color: #2c3e50;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        .footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Student Management</h1>
+    </div>
+
+    <div class="container">
+        <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: center; flex-wrap: wrap;">
+            <button class="btn" id="importStudentsBtn"><i class="fas fa-file-import"></i> Import Students</button>
+            <button class="btn download-template" id="downloadTemplateBtn"><i class="fas fa-download"></i> Download Sample Template</button>
+            <input type="file" id="fileInput" class="file-input" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+        </div>
+        <div class="add-student-form">
+            <h2>Add New Student</h2>
+            <form id="addStudentForm" onsubmit="addStudent(event)">
+                <input type="hidden" id="editingStudentId" value="">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="rollNo">Roll No: <span style="color:red">*</span></label>
+                        <input type="text" id="rollNo" required placeholder="Enter roll number">
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Student Name: <span style="color:red">*</span></label>
+                        <input type="text" id="name" required placeholder="Enter student name" oninput="this.value = this.value.toUpperCase()" style="text-transform: uppercase;">
+                    </div>
+                    <div class="form-group">
+                        <label for="department">Department: <span style="color:red">*</span></label>
+                        <select id="department" required>
+                            <option value="">Select Department</option>
+                            <option value="Mechanical Engineering">Mechanical Engineering</option>
+                            <option value="Computer Engineering">Computer Engineering</option>
+                            <option value="Information Technology">Information Technology</option>
+                            <option value="Electronics & Communication">Electronics & Communication</option>
+                            <option value="Electrical Engineering">Electrical Engineering</option>
+                            <option value="Civil Engineering">Civil Engineering</option>
+                            <option value="Artificial Intelligence">Artificial Intelligence</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="class">Class: <span style="color:red">*</span></label>
+                        <select id="class" required>
+                            <option value="">Select Class</option>
+                            <option value="FY">FY</option>
+                            <option value="SY">SY</option>
+                            <option value="TY">TY</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="division">Division (optional):</label>
+                        <select id="division">
+                            <option value="">Select Division</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number:</label>
+                        <input type="tel" id="phone" pattern="[0-9]{10}" placeholder="Enter 10-digit phone number" title="Please enter a valid 10-digit phone number">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email (optional):</label>
+                        <input type="email" id="email" placeholder="Enter email address (optional)">
+                    </div>
+                    <div class="form-group">
+                        <label>Lecture Types:</label>
+                        <div class="lecture-type-select">
+                            <label class="lecture-type-option">
+                                <input type="checkbox" name="lectureType" value="theory" checked> Theory
+                            </label>
+                            <label class="lecture-type-option">
+                                <input type="checkbox" name="lectureType" value="practical" checked> Practical
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 16px; display: flex; justify-content: flex-end; gap: 1rem;">
+                    <button type="button" class="btn" id="deleteAllBtn" style="background:#dc3545;font-size:1.1em;padding:8px 24px;">Delete All Students</button>
+                    <button type="submit" class="btn" id="submitBtn" style="font-size: 1.1em; padding: 8px 24px;">Add Student</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="student-list">
+            <h2>Student List</h2>
+            <div id="studentTableContainer">
+                <!-- Student table will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 Student Attendance Management System. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Initialize students array from localStorage
+        let students = JSON.parse(localStorage.getItem('students')) || [];
+        // Migration: Assign IDs to students missing an id
+        let updated = false;
+        students.forEach((student, idx) => {
+            if (!student.id) {
+                student.id = (Date.now() + idx).toString();
+                updated = true;
+            }
+        });
+        if (updated) {
+            localStorage.setItem('students', JSON.stringify(students));
+        }
+        // Always refresh the displayed student list after migration
+        displayStudents && displayStudents();
+
+        // Function to add a new student
+        function addStudent(event) {
+            event.preventDefault();
+
+            const editingId = document.getElementById('editingStudentId').value;
+            const rollNo = document.getElementById('rollNo').value;
+            const name = document.getElementById('name').value;
+            const department = document.getElementById('department').value;
+            const className = document.getElementById('class').value;
+            const division = document.getElementById('division').value;
+            const phone = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
+            
+            const lectureTypes = Array.from(document.getElementsByName('lectureType'))
+                .filter(checkbox => checkbox.checked)
+                .map(checkbox => checkbox.value);
+
+            if (editingId) {
+                // Update existing student
+                students = students.map(stu => {
+                    if (stu.id === editingId) {
+                        return {
+                            ...stu,
+                            rollNo,
+                            name,
+                            department,
+                            class: className,
+                            division: division || '',
+                            phone,
+                            email: email || '',
+                            lectureTypes
+                        };
+                    }
+                    return stu;
+                });
+                localStorage.setItem('students', JSON.stringify(students));
+                document.getElementById('addStudentForm').reset();
+                document.getElementById('editingStudentId').value = '';
+                document.getElementById('submitBtn').textContent = 'Add Student';
+                displayStudents();
+                return;
+            }
+
+            const student = {
+                id: Date.now().toString(),
+                rollNo,
+                name,
+                department,
+                class: className,
+                division: division || '',
+                phone,
+                email: email || '',
+                lectureTypes
+            };
+
+            students.push(student);
+            localStorage.setItem('students', JSON.stringify(students));
+            // Refresh students array from localStorage before displaying
+            students = JSON.parse(localStorage.getItem('students')) || [];
+            document.getElementById('addStudentForm').reset();
+            displayStudents();
+        }
+
+        // Edit student
+        function editStudent(studentId) {
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+            document.getElementById('editingStudentId').value = student.id;
+            document.getElementById('rollNo').value = student.rollNo;
+            document.getElementById('name').value = student.name;
+            document.getElementById('department').value = student.department;
+            document.getElementById('class').value = student.class;
+            document.getElementById('division').value = student.division;
+            document.getElementById('phone').value = student.phone;
+            document.getElementById('email').value = student.email;
+            // Set lecture types
+            const lectureTypes = student.lectureTypes || [];
+            Array.from(document.getElementsByName('lectureType')).forEach(cb => {
+                cb.checked = lectureTypes.includes(cb.value);
+            });
+            document.getElementById('submitBtn').textContent = 'Update Student';
+        }
+
+        // Function to display students
+        function displayStudents() {
+            const container = document.getElementById('studentTableContainer');
+            
+            if (students.length === 0) {
+                container.innerHTML = '<p class="empty-state">No students added yet.</p>';
+                return;
+            }
+
+            const table = document.createElement('table');
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Roll No</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Class</th>
+                        <th>Division</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Lecture Types</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${students.map((student, index) => `
+                        <tr>
+                            <td>${student.id}</td>
+                            <td>${student.rollNo}</td>
+                            <td>${student.name}</td>
+                            <td>${student.department}</td>
+                            <td>${student.class}</td>
+                            <td>${student.division}</td>
+                            <td>${student.phone}</td>
+                            <td>${student.email}</td>
+                            <td>${student.lectureTypes ? student.lectureTypes.join(', ') : ''}</td>
+                            <td>
+                                <button class="action-btn edit-btn" onclick="editStudent('${student.id}')"><i class="fas fa-edit"></i></button>
+                                <button class="action-btn delete-btn" onclick="deleteStudent('${index}')"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>`).join('')}
+                </tbody>
+            `;
+            container.innerHTML = '';
+            container.appendChild(table);
+        }
+
+        // Function to delete a student
+        function deleteStudent(index) {
+            if (confirm('Are you sure you want to delete this student?')) {
+                students.splice(index, 1);
+                localStorage.setItem('students', JSON.stringify(students));
+                // Refresh students array from localStorage before displaying
+                students = JSON.parse(localStorage.getItem('students')) || [];
+                displayStudents();
+            }
+        }
+
+        // Add event listener to form
+        document.getElementById('addStudentForm').addEventListener('submit', addStudent);
+
+        // Initial display
+        displayStudents();
+    </script>
+</script>
+<script>
+    document.getElementById('importStudentsBtn').addEventListener('click', function() {
+        document.getElementById('fileInput').click();
+    });
+    document.getElementById('downloadTemplateBtn').addEventListener('click', function() {
+        // CSV headers for the sample template
+        const headers = [
+            'Roll No', 'Student Name', 'Department', 'Class', 'Division', 'Phone Number', 'Email', 'Lecture Types (theory/practical/comma-separated)'
+        ];
+        const sampleRow = ['101', 'JOHN DOE', 'Computer Engineering', 'FY', 'A', '9876543210', 'johndoe@email.com', 'theory,practical'];
+        const csvContent = [headers, sampleRow].map(e => e.join(",")).join("\r\n");
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'student_sample_template.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            const text = evt.target.result;
+            let rows = text.split(/\r?\n/).filter(Boolean);
+            if (rows.length < 2) {
+                alert('CSV file is empty or invalid.');
+                return;
+            }
+            const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
+            const expectedHeaders = ['roll no','student name','department','class','division','phone number','email','lecture types (theory/practical/comma-separated)'];
+            if (headers.length < 7 || !expectedHeaders.every((h, i) => headers[i] === h)) {
+                alert('CSV headers do not match the required template.');
+                return;
+            }
+            let imported = 0;
+            for (let i = 1; i < rows.length; i++) {
+                let cols = rows[i].split(',').map(c => c.trim());
+                if (cols.length < 7) continue;
+                const [rollNo, name, department, className, division, phone, email, lectureTypesRaw] = cols;
+                if (!rollNo || !name || !department || !className) continue; // phone is now optional
+                let lectureTypes = lectureTypesRaw ? lectureTypesRaw.split(',').map(x => x.trim()).filter(Boolean) : ['theory','practical'];
+                // If lectureTypes is missing or only 'theory', default to both checked (theory, practical)
+                if (!lectureTypes.length || (lectureTypes.length === 1 && lectureTypes[0].toLowerCase() === 'theory')) {
+                    lectureTypes = ['theory','practical'];
+                }
+                const student = {
+                    id: Date.now().toString() + Math.floor(Math.random()*10000),
+                    rollNo,
+                    name,
+                    department,
+                    class: className,
+                    division: division || '',
+                    phone,
+                    email: email || '',
+                    lectureTypes
+                };
+                students.push(student);
+                imported++;
+            }
+            localStorage.setItem('students', JSON.stringify(students));
+            students = JSON.parse(localStorage.getItem('students')) || [];
+            displayStudents();
+            alert(imported + ' students imported successfully!');
+        };
+        reader.readAsText(file);
+        // Reset file input
+        e.target.value = '';
+    });
+    document.getElementById('deleteAllBtn').onclick = function() {
+        if (confirm('Are you sure you want to delete ALL students? This cannot be undone.')) {
+            localStorage.removeItem('students');
+            students = [];
+            displayStudents();
+            alert('All students deleted!');
+        }
+    };
+</script>
+</body>
+</html>
